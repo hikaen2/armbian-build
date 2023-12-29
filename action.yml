@@ -6,7 +6,7 @@ inputs:
   armbian_target:
     description: "Build image or kernel"
     required: false
-    default: "kernel"
+    default: "image"
 
   armbian_branch:
     description: "Choose kernel branch"
@@ -36,17 +36,7 @@ inputs:
   armbian_compress:
     description: "Armbian compress method"
     required: false
-    default: ""
-
-  armbian_sign_key:
-    description: "Armbian sign key"
-    required: false
-    default: ""
-
-  armbian_sign_password:
-    description: "Armbian sign password"
-    required: false
-    default: ""
+    default: "sha,img,xz"
 
 runs:
   using: "composite"
@@ -99,4 +89,3 @@ runs:
 branding:
   icon: "check"
   color: "red"
-

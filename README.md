@@ -17,7 +17,7 @@
 
 ## Getting started
 
-### Requirements
+### Requirements for self hosted
 
 - x86_64 / aarch64 machine
 - at least 2GB of memory and ~35GB of disk space for VM, container or bare metal installation
@@ -26,9 +26,7 @@
 - Superuser rights (configured sudo or root access).
 - Make sure your system is up-to-date! Outdated Docker binaries, for example, can cause trouble.
 
-### Start with the build script
-
-##### Development branch:
+For stable branch use `--branch=v23.11`
 
 ```bash
 apt-get -y install git
@@ -37,13 +35,42 @@ cd build
 ./compile.sh
 ```
 
-##### Stable branch:
+### Requirements for online builds
 
-```bash
-apt-get -y install git
-git clone --depth=1 --branch=v23.11 https://github.com/armbian/build
-cd build
-./compile.sh
+- free GitHub account
+
+## Example usage:
+
+Generate file `.github/workflows/armbian.yml` inside your repository and run action "Build Armbian". Action will build x86 Armbian image on public build infrastructure and upload generated image to your repository release. Note: GitHub upload file limit is 2Gb.
+
+```
+name: "Build Armbian"
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - uses: armbian/build@main
+        with:
+          armbian_branch:    "current"      # branch: legacy, current, edge, etc.
+          armbian_release:   "jammy"        # userspace: jammy, bookworm, trixie, etc.
+          armbian_ui:        "minimal"      # minimal, server, xfce, gnome, etc.
+          armbian_board:     "uefi-x86"     # build targets from config/boards
+
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: "armbian"
+          name: "Armbian unofficial image"
+          artifacts: "${{ env.ARMBIAN_SCRIPT_PATH }}/output/images/*"
+          allowUpdates: true
+          removeArtifacts: true
+          replacesArtifacts: true
+          makeLatest: true
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          body: |
+            Unofficial Armbian artifacts
 ```
 
 
