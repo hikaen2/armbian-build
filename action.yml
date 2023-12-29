@@ -38,6 +38,16 @@ inputs:
     required: false
     default: "sha,img,xz"
 
+  armbian_extensions:
+    description: "Armbian lists of extensions"
+    required: false
+    default: ""
+
+  armbian_userpatches:
+    description: "Armbian userpatches path"
+    required: false
+    default: ""
+
 runs:
   using: "composite"
 
@@ -80,7 +90,10 @@ runs:
         DESKTOP_APPGROUPS_SELECTED="${DESKTOP_APPGROUPS_SELECTED}" \
         DESKTOP_ENVIRONMENT_CONFIG_NAME="${DESKTOP_ENVIRONMENT_CONFIG_NAME}" \
         COMPRESS_OUTPUTIMAGE="${{ inputs.armbian_compress }}" \
+        USERPATCHES_PATH="${{ inputs.armbian_userpatches }}" \
+        ENABLE_EXTENSIONS="${{ inputs.armbian_extensions }}" \
         SHARE_LOG="yes" \
+        PREFER_DOCKER="no" \
         EXPERT="yes"
 
         # save path
