@@ -1,0 +1,102 @@
+name: "Rebuild Armbian"
+author: "https://github.com/armbian"
+description: "Build Armbian Linux"
+inputs:
+
+  armbian_target:
+    description: "Build image or kernel"
+    required: false
+    default: "kernel"
+
+  armbian_branch:
+    description: "Choose kernel branch"
+    required: false
+    default: "current"
+
+  armbian_release:
+    description: "Choose userspace release"
+    required: false
+    default: "jammy"
+
+  armbian_version:
+    description: "Set different version"
+    required: false
+    default: ""
+
+  armbian_board:
+    description: "Select hardware platform"
+    required: false
+    default: "uefi-x86"
+
+  armbian_ui:
+    description: "Armbian user interface"
+    required: false
+    default: "minimal"
+
+  armbian_compress:
+    description: "Armbian compress method"
+    required: false
+    default: ""
+
+  armbian_sign_key:
+    description: "Armbian sign key"
+    required: false
+    default: ""
+
+  armbian_sign_password:
+    description: "Armbian sign password"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+
+  steps:
+    - shell: bash
+      run: |
+
+        # userspace decode
+        if [[ "${{ inputs.armbian_ui }}" == minimal ]]; then
+          BUILD_DESKTOP="no"
+          BUILD_MINIMAL="yes"
+        elif [[ "${{ inputs.armbian_ui }}" == server ]]; then
+          BUILD_DESKTOP="no"
+          BUILD_MINIMAL="no"
+        else
+          BUILD_DESKTOP="yes"
+          BUILD_MINIMAL="no"
+          DESKTOP_ENVIRONMENT="${{ inputs.armbian_ui }}"
+          DESKTOP_APPGROUPS_SELECTED=""
+          DESKTOP_ENVIRONMENT_CONFIG_NAME="config_base"
+        fi
+
+        # compile image or kernel translation
+        BUILD_TARGET="${{ inputs.armbian_target }}"
+        [[ "${{ inputs.armbian_target }}" == image ]] && unset BUILD_TARGET
+
+        # go to build folder
+        cd ${GITHUB_ACTION_PATH}
+
+        # execute build command
+        ./compile.sh "${BUILD_TARGET}" \
+        REVISION="${{ inputs.armbian_version }}" \
+        BOARD="${{ inputs.armbian_board }}" \
+        BRANCH="${{ inputs.armbian_branch }}" \
+        RELEASE="${{ inputs.armbian_release }}" \
+        KERNEL_CONFIGURE="no" \
+        BUILD_DESKTOP="${BUILD_DESKTOP}" \
+        BUILD_MINIMAL="${BUILD_MINIMAL}" \
+        DESKTOP_ENVIRONMENT="${DESKTOP_ENVIRONMENT}" \
+        DESKTOP_APPGROUPS_SELECTED="${DESKTOP_APPGROUPS_SELECTED}" \
+        DESKTOP_ENVIRONMENT_CONFIG_NAME="${DESKTOP_ENVIRONMENT_CONFIG_NAME}" \
+        COMPRESS_OUTPUTIMAGE="${{ inputs.armbian_compress }}" \
+        SHARE_LOG="yes" \
+        EXPERT="yes"
+
+        # save path
+        echo "ARMBIAN_SCRIPT_PATH=${GITHUB_ACTION_PATH}" >> $GITHUB_ENV
+
+branding:
+  icon: "check"
+  color: "red"
+
